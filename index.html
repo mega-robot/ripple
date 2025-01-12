@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Water Quality Index Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px; /* Increased width for the form */
+        }
+        .container h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .output {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>WQI Calculator</h1>
+        <div class="form-group">
+            <label for="tdsVoltage">TDS Voltage (in volts):</label>
+            <input type="number" id="tdsVoltage" step="0.01">
+        </div>
+        <div class="form-group">
+            <label for="turbidityVoltage">Turbidity Voltage (in volts):</label>
+            <input type="number" id="turbidityVoltage" step="0.01">
+        </div>
+        <div class="form-group">
+            <label for="mq135Reading">MQ135 Reading (ppm):</label>
+            <input type="number" id="mq135Reading">
+        </div>
+        <div class="form-group">
+            <label for="pH">pH Value:</label>
+            <input type="number" id="pH" step="0.01">
+        </div>
+        <div class="form-group">
+            <label for="temperature">Temperature (in Celsius):</label>
+            <input type="number" id="temperature" step="0.01">
+        </div>
+        <button onclick="calculateWQI()">Calculate WQI</button>
+        <div id="output" class="output"></div>
+    </div>
+
+    <script>
+        const TDS_WEIGHT = 3.0;
+        const TURBIDITY_WEIGHT = 2.0;
+        const MQ135_WEIGHT = 4.0;
+        const PH_WEIGHT = 5.0;
+        const TEMPERATURE_WEIGHT = 1.0;
+
+        function calculateWQI() {
+            const tdsVoltage = parseFloat(document.getElementById('tdsVoltage').value) || 0;
+            const turbidityVoltage = parseFloat(document.getElementById('turbidityVoltage').value) || 0;
+            const mq135Reading = parseFloat(document.getElementById('mq135Reading').value) || 0;
+            const pH = parseFloat(document.getElementById('pH').value) || 0;
+            const temperature = parseFloat(document.getElementById('temperature').value) || 0;
+
+            let tdswqi = tdsVoltage <= 0.6 ? 100 : tdsVoltage <= 0.9 ? 80 : tdsVoltage <= 1.2 ? 60 : tdsVoltage <= 2.4 ? 40 : 20;
+            let turbiditywqi = turbidityVoltage <= 1 ? 100 : turbidityVoltage <= 2 ? 80 : turbidityVoltage <= 3 ? 60 : turbidityVoltage <= 4 ? 40 : 20;
+            let mq135wqi = mq135Reading <= 400 ? 100 : mq135Reading <= 450 ? 80 : mq135Reading <= 500 ? 60 : mq135Reading <= 550 ? 40 : 20;
+            let phwqi = (pH >= 6.5 && pH <= 8.5) ? 100 : (pH >= 5.5 && pH < 6.5) || (pH > 8.5 && pH <= 9) ? 60 : 20;
+            let temperaturewqi = (temperature >= 20 && temperature <= 30) ? 100 : (temperature > 30 && temperature <= 35) ? 60 : 20;
+
+            const weightedSum = (tdswqi * TDS_WEIGHT) +
+                                (turbiditywqi * TURBIDITY_WEIGHT) +
+                                (mq135wqi * MQ135_WEIGHT) +
+                                (phwqi * PH_WEIGHT) +
+                                (temperaturewqi * TEMPERATURE_WEIGHT);
+            
+            const totalWeight = TDS_WEIGHT + TURBIDITY_WEIGHT + MQ135_WEIGHT + PH_WEIGHT + TEMPERATURE_WEIGHT;
+            const overallWQI = weightedSum / totalWeight;
+
+            classifyWaterQuality(overallWQI);
+        }
+
+        function classifyWaterQuality(wqi) {
+            const output = document.getElementById('output');
+            let message = `<strong>Water Quality Index (WQI):</strong> ${wqi.toFixed(2)}<br>`;
+
+            if (wqi >= 90) {
+                message += `<strong>Classification:</strong> Excellent - Suitable for drinking and all domestic uses.<br>
+                <strong>Recommendation:</strong> Maintain protection and conservation of the water source.<br>
+                <strong>Additional Notes:</strong> This water supports sensitive aquatic ecosystems and can be used without treatment for consumption.<br>
+                <strong>Additional Considerations:</strong> Maintain regular monitoring to ensure no contamination and support ecosystem conservation.`;
+            } else if (wqi >= 70) {
+                message += `<strong>Classification:</strong> Good - Suitable for irrigation, livestock, and swimming.<br>
+                <strong>Recommendation:</strong> Regular monitoring and moderate filtration recommended.<br>
+                <strong>Additional Notes:</strong> While not optimal for drinking, the water can support a variety of recreational and agricultural applications.<br>
+                <strong>Additional Considerations:</strong> Educate communities on pollution prevention and implement buffer zones near agricultural fields to reduce runoff contamination.`;
+            } else if (wqi >= 50) {
+                message += `<strong>Classification:</strong> Moderate - Suitable for industrial use.<br>
+                <strong>Recommendation:</strong> Filtration and chemical treatment advised for better usability.<br>
+                <strong>Additional Notes:</strong> The water may require significant treatment before human contact but can be used for industrial processes.<br>
+                <strong>Additional Considerations:</strong> Use advanced filtration systems and encourage industries to adopt wastewater management strategies.`;
+            } else if (wqi >= 30) {
+                message += `<strong>Classification:</strong> Poor - Suitable for limited industrial use.<br>
+                <strong>Recommendation:</strong> Implement pollution control measures and advanced treatment processes.<br>
+                <strong>Additional Notes:</strong> Direct human contact is not advised. Focus on pollutant reduction and environmental remediation.<br>
+                <strong>Additional Considerations:</strong> Introduce bioremediation techniques and enforce strict regulations on industrial discharge.`;
+            } else {
+                message += `<strong>Classification:</strong> Very Poor - Not suitable for any use.<br>
+                <strong>Recommendation:</strong> Urgent remediation required, such as aeration, chemical treatments, and pollution control.<br>
+                <strong>Additional Notes:</strong> Immediate action is required to prevent environmental damage and restore water usability.<br>
+                <strong>Additional Considerations:</strong> Launch large-scale cleanup operations and promote community involvement in monitoring and reporting pollution sources.`;
+            }
+
+            output.innerHTML = message;
+        }
+    </script>
+</body>
+</html>
