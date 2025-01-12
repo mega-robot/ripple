@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Water Quality Report</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f9;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: 50px auto;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        h1 {
+            text-align: center;
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: #1a73e8;
+            border-bottom: 2px solid #1a73e8;
+            display: inline-block;
+            padding-bottom: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 16px;
+        }
+        table thead {
+            background-color: #1a73e8;
+            color: #fff;
+        }
+        table th, table td {
+            text-align: left;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+        }
+        table tbody tr:nth-child(odd) {
+            background-color: #f9f9f9;
+        }
+        table tbody tr:hover {
+            background-color: #f1f5fc;
+        }
+        .columns {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .column {
+            flex: 1;
+            min-width: 250px;
+            padding: 20px;
+            background-color: #f9fbfd;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .column h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: #1a73e8;
+        }
+        .column p {
+            font-size: 16px;
+            line-height: 1.5;
+            color: #555;
+        }
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 14px;
+            color: #888;
+        }
+        footer a {
+            color: #1a73e8;
+            text-decoration: none;
+        }
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Water Quality Report</h1>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Parameter</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>TDS Voltage (in volts)</td>
+                    <td id="tdsVoltage"></td>
+                </tr>
+                <tr>
+                    <td>Turbidity Voltage (in volts)</td>
+                    <td id="turbidityVoltage"></td>
+                </tr>
+                <tr>
+                    <td>MQ135 Reading (ppm)</td>
+                    <td id="mq135Reading"></td>
+                </tr>
+                <tr>
+                    <td>pH Value</td>
+                    <td id="pH"></td>
+                </tr>
+                <tr>
+                    <td>Temperature (in Celsius)</td>
+                    <td id="temperature"></td>
+                </tr>
+                <tr>
+                    <th>Water Quality Index (WQI)</th>
+                    <th id="wqi"></th>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="columns">
+            <div class="column" id="classification"></div>
+            <div class="column" id="recommendation"></div>
+            <div class="column" id="additionalNotes"></div>
+        </div>
+
+        <div class="columns">
+            <div class="column" id="rating">
+                <h3>Usefulness Ratings (Out of 10)</h3>
+                <p><strong>Drinking:</strong> <span id="drinkingRating">-</span>/10</p>
+                <p><strong>Industrial Usage:</strong> <span id="industrialRating">-</span>/10</p>
+                <p><strong>Irrigation:</strong> <span id="irrigationRating">-</span>/10</p>
+                <p><strong>Agriculture:</strong> <span id="agricultureRating">-</span>/10</p>
+                <p><strong>Fishing:</strong> <span id="fishingRating">-</span>/10</p>
+                <p><strong>Mining:</strong> <span id="miningRating">-</span>/10</p>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2025 Water Quality Report | <a href="#">Learn More</a></p>
+    </footer>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+
+        document.getElementById('tdsVoltage').textContent = urlParams.get('tdsVoltage');
+        document.getElementById('turbidityVoltage').textContent = urlParams.get('turbidityVoltage');
+        document.getElementById('mq135Reading').textContent = urlParams.get('mq135Reading');
+        document.getElementById('pH').textContent = urlParams.get('pH');
+        document.getElementById('temperature').textContent = urlParams.get('temperature');
+
+        // Ensure WQI is displayed with two decimal points
+        const wqi = parseFloat(urlParams.get('wqi')).toFixed(2);
+        document.getElementById('wqi').textContent = wqi;
+
+        // Classification, recommendation, and ratings logic
+        let classification = "", recommendation = "", additionalNotes = "";
+        let drinkingRating = 0, industrialRating = 0, irrigationRating = 0;
+        let agricultureRating = 0, fishingRating = 0, miningRating = 0;
+
+        if (wqi >= 90) {
+            classification = "<h3>Classification</h3><p>Excellent - Suitable for drinking and all domestic uses.</p>";
+            recommendation = "<h3>Recommendation</h3><p>Maintain the protection and conservation of the water source.</p>";
+            additionalNotes = "<h3>Additional Notes</h3><p>This water supports sensitive aquatic ecosystems and can be used without treatment for human consumption.</p>";
+            drinkingRating = 10; industrialRating = 9; irrigationRating = 9;
+            agricultureRating = 9; fishingRating = 9; miningRating = 8;
+        } else if (wqi >= 70) {
+            classification = "<h3>Classification</h3><p>Good - Suitable for irrigation, livestock, and recreational activities.</p>";
+            recommendation = "<h3>Recommendation</h3><p>Regular monitoring and moderate filtration recommended to ensure continued usability.</p>";
+            additionalNotes = "<h3>Additional Notes</h3><p>Water can support a variety of applications including recreational and agricultural purposes but may require minimal treatment for drinking.</p>";
+            drinkingRating = 8; industrialRating = 8; irrigationRating = 9;
+            agricultureRating = 8; fishingRating = 8; miningRating = 7;
+        } else if (wqi >= 50) {
+            classification = "<h3>Classification</h3><p>Moderate - Suitable for industrial use and limited agricultural applications.</p>";
+            recommendation = "<h3>Recommendation</h3><p>Filtration and chemical treatment advised for improving water quality.</p>";
+            additionalNotes = "<h3>Additional Notes</h3><p>Water is not safe for human consumption without significant treatment but can be used in controlled industrial and agricultural processes.</p>";
+            drinkingRating = 5; industrialRating = 7; irrigationRating = 8;
+            agricultureRating = 7; fishingRating = 6; miningRating = 6;
+        } else if (wqi >= 30) {
+            classification = "<h3>Classification</h3><p>Poor - Limited suitability for industrial use and environmental applications.</p>";
+            recommendation = "<h3>Recommendation</h3><p>Pollution control and advanced treatment measures are necessary to restore water usability.</p>";
+            additionalNotes = "<h3>Additional Notes</h3><p>Water may cause environmental damage if untreated. Focus on reducing pollutants and remediating the affected ecosystem.</p>";
+            drinkingRating = 3; industrialRating = 5; irrigationRating = 6;
+            agricultureRating = 5; fishingRating = 4; miningRating = 4;
+        } else {
+            classification = "<h3>Classification</h3><p>Very Poor - Unsuitable for any use without extensive remediation.</p>";
+            recommendation = "<h3>Recommendation</h3><p>Urgent action required to address contamination through aeration, advanced filtration, and pollution reduction measures.</p>";
+            additionalNotes = "<h3>Additional Notes</h3><p>The water quality is critically low and poses a significant risk to the environment and health. Immediate intervention is required.</p>";
+            drinkingRating = 1; industrialRating = 2; irrigationRating = 3;
+            agricultureRating = 2; fishingRating = 2; miningRating = 2;
+        }
+
+        document.getElementById('classification').innerHTML = classification;
+        document.getElementById('recommendation').innerHTML = recommendation;
+        document.getElementById('additionalNotes').innerHTML = additionalNotes;
+
+        document.getElementById('drinkingRating').textContent = drinkingRating;
+        document.getElementById('industrialRating').textContent = industrialRating;
+        document.getElementById('irrigationRating').textContent = irrigationRating;
+        document.getElementById('agricultureRating').textContent = agricultureRating;
+        document.getElementById('fishingRating').textContent = fishingRating;
+        document.getElementById('miningRating').textContent = miningRating;
+    </script>
+
+</body>
+</html>
